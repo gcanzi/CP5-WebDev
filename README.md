@@ -99,6 +99,6 @@ O design foi desenvolvido seguindo a metodologia **Mobile First**, utilizando br
 
 O site está disponível através do Vercel:
 
-🔗 [Acesse aqui](trocar)
+🔗 [Acesse aqui](https://gcanzi.github.io/CP5-WebDev/)
 
 ---
