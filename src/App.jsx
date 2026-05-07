@@ -1,17 +1,44 @@
 import { useState, useEffect } from 'react';
 
 function App() {
-  const [dishes] = useState([
-    { id: 1, title: 'Bolo de Chocolate', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop' },
-    { id: 2, title: 'Pudim de Leite', image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop' },
-    { id: 3, title: 'Brigadeiro Gourmet', image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=300&fit=crop' },
-    { id: 4, title: 'Torta de Morango', image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop' },
-    { id: 5, title: 'Brownie com Sorvete', image: 'https://images.unsplash.com/photo-1607920591413-4ec007e70023?w=400&h=300&fit=crop' }
-  ]);
-  const [loading] = useState(false);
+  const [dishes, setDishes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    const fetchDishes = async () => {
+      try {
+        const response = await fetch('https://api.spoonacular.com/recipes/random?number=5&tags=dessert&apiKey=fd99df46282646fc86a754d918ef55d1');
+        const data = await response.json();
+        
+        const recipes = data.recipes || [];
+
+        const translatedRecipes = await Promise.all(
+          recipes.map(async (recipe) => {
+            try {
+              const translateResponse = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(recipe.title)}&langpair=en|pt-BR`);
+              const translateData = await translateResponse.json();
+              return { 
+                ...recipe, 
+                title: translateData.responseData.translatedText || recipe.title 
+              };
+            } catch (error) {
+              console.error('Erro ao traduzir:', error);
+              return recipe;
+            }
+          })
+        );
+
+        setDishes(translatedRecipes);
+      } catch (error) {
+        console.error('Erro ao buscar pratos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDishes();
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
